@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15.6
+    container_name: smartgrid_postgres
+    environment:
+      POSTGRES_DB: smartgrid
+      POSTGRES_USER: smartgrid_user
+      POSTGRES_PASSWORD: smartgrid_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - smartgrid_network
+
+  # MQTT Broker (Eclipse Mosquitto)
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0.18
+    container_name: smartgrid_mqtt
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mqtt-broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mqtt_data:/mosquitto/data
+      - mqtt_logs:/mosquitto/log
+    networks:
+      - smartgrid_network
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7.2.4-alpine
+    container_name: smartgrid_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - smartgrid_network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smartgrid_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://smartgrid_user:smartgrid_pass@postgres:5432/smartgrid
+      - MQTT_BROKER_HOST=mqtt-broker
+      - MQTT_BROKER_PORT=1883
+      - REDIS_URL=redis://redis:6379
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    depends_on:
+      - postgres
+      - mqtt-broker
+      - redis
+    volumes:
+      - ./backend:/app
+      - ./ml-models:/app/ml-models
+    networks:
+      - smartgrid_network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smartgrid_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_MQTT_URL=ws://localhost:9001
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - smartgrid_network
+
+  # Node-RED for IoT dashboards
+  node-red:
+    image: nodered/node-red:3.1.7
+    container_name: smartgrid_nodered
+    ports:
+      - "1880:1880"
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./node-red:/data
+      - node_red_data:/data
+    depends_on:
+      - mqtt-broker
+      - backend
+    networks:
+      - smartgrid_network
+
+  # ML Training Service (optional, for model retraining)
+  ml-trainer:
+    build:
+      context: ./ml-models
+      dockerfile: Dockerfile
+    container_name: smartgrid_ml_trainer
+    environment:
+      - DATABASE_URL=postgresql://smartgrid_user:smartgrid_pass@postgres:5432/smartgrid
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    depends_on:
+      - postgres
+    volumes:
+      - ./ml-models:/app
+      - ml_models_data:/app/models
+    networks:
+      - smartgrid_network
+    profiles:
+      - training
+
+volumes:
+  postgres_data:
+  mqtt_data:
+  mqtt_logs:
+  redis_data:
+  node_red_data:
+  ml_models_data:
+
+networks:
+  smartgrid_network:
+    driver: bridge
