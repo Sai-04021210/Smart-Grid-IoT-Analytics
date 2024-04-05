@@ -1,0 +1,287 @@
+[
+    {
+        "id": "smartgrid-dashboard",
+        "type": "tab",
+        "label": "Smart Grid Dashboard",
+        "disabled": false,
+        "info": "Main dashboard for Smart Grid IoT Analytics"
+    },
+    {
+        "id": "mqtt-data-processing",
+        "type": "tab",
+        "label": "MQTT Data Processing",
+        "disabled": false,
+        "info": "MQTT message processing and routing"
+    },
+    {
+        "id": "energy-analytics",
+        "type": "tab",
+        "label": "Energy Analytics",
+        "disabled": false,
+        "info": "Energy consumption analytics and predictions"
+    },
+    {
+        "id": "renewable-monitoring",
+        "type": "tab",
+        "label": "Renewable Energy",
+        "disabled": false,
+        "info": "Solar and wind energy monitoring"
+    },
+    {
+        "id": "mqtt-broker",
+        "type": "mqtt-broker",
+        "name": "Smart Grid MQTT",
+        "broker": "mqtt-broker",
+        "port": "1883",
+        "clientid": "node-red-smartgrid",
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "smartgrid/nodered/status",
+        "birthQos": "0",
+        "birthPayload": "online",
+        "closeTopic": "smartgrid/nodered/status",
+        "closeQos": "0",
+        "closePayload": "offline",
+        "willTopic": "smartgrid/nodered/status",
+        "willQos": "0",
+        "willPayload": "offline"
+    },
+    {
+        "id": "postgres-db",
+        "type": "postgres-db",
+        "name": "Smart Grid DB",
+        "host": "postgres",
+        "hostFieldType": "str",
+        "port": "5432",
+        "portFieldType": "num",
+        "database": "smartgrid",
+        "databaseFieldType": "str",
+        "ssl": "false",
+        "sslFieldType": "bool",
+        "max": "10",
+        "maxFieldType": "num",
+        "idle": "1000",
+        "idleFieldType": "num",
+        "connectionTimeout": "10000",
+        "connectionTimeoutFieldType": "num",
+        "user": "smartgrid_user",
+        "userFieldType": "str",
+        "password": "smartgrid_pass",
+        "passwordFieldType": "str"
+    },
+    {
+        "id": "ui-base",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Smart Grid IoT Analytics",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "ui-tab-overview",
+        "type": "ui_tab",
+        "name": "Overview",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "ui-tab-energy",
+        "type": "ui_tab",
+        "name": "Energy Monitoring",
+        "icon": "flash_on",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "ui-tab-renewable",
+        "type": "ui_tab",
+        "name": "Renewable Energy",
+        "icon": "wb_sunny",
+        "order": 3,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "ui-tab-pricing",
+        "type": "ui_tab",
+        "name": "Dynamic Pricing",
+        "icon": "attach_money",
+        "order": 4,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "ui-group-overview",
+        "type": "ui_group",
+        "name": "System Overview",
+        "tab": "ui-tab-overview",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "ui-group-metrics",
+        "type": "ui_group",
+        "name": "Key Metrics",
+        "tab": "ui-tab-overview",
+        "order": 2,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "ui-group-energy-consumption",
+        "type": "ui_group",
+        "name": "Energy Consumption",
+        "tab": "ui-tab-energy",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "ui-group-smart-meters",
+        "type": "ui_group",
+        "name": "Smart Meters Status",
+        "tab": "ui-tab-energy",
+        "order": 2,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "ui-group-solar",
+        "type": "ui_group",
+        "name": "Solar Generation",
+        "tab": "ui-tab-renewable",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "ui-group-wind",
+        "type": "ui_group",
+        "name": "Wind Generation",
+        "tab": "ui-tab-renewable",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "ui-group-pricing-current",
+        "type": "ui_group",
+        "name": "Current Pricing",
+        "tab": "ui-tab-pricing",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "ui-group-pricing-forecast",
+        "type": "ui_group",
+        "name": "Price Forecast",
+        "tab": "ui-tab-pricing",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    }
+]
