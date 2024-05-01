@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Row, Col, Card, Statistic, Progress, Alert, Spin } from 'antd'
 import {
   ThunderboltOutlined,
-  SolarOutlined,
+  SunOutlined,
   DollarOutlined,
   ApiOutlined,
   ArrowUpOutlined,
@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [energyData, setEnergyData] = useState<any>(null)
   const [renewableData, setRenewableData] = useState<any>(null)
-  
+
   const { isConnected, messages } = useMQTT()
 
   useEffect(() => {
@@ -68,7 +68,7 @@ const Dashboard: React.FC = () => {
       try {
         // Simulate API calls
         await new Promise(resolve => setTimeout(resolve, 1000))
-        
+
         // Mock data - in real app, fetch from API
         setMetrics({
           totalConsumption: 1247.5,
@@ -124,7 +124,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (messages.length > 0) {
       const latestMessage = messages[0]
-      
+
       if (latestMessage.topic.includes('meters') && latestMessage.topic.includes('data')) {
         // Update consumption metrics
         const consumption = latestMessage.payload.active_energy || 0
@@ -169,11 +169,11 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '400px' 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '400px'
       }}>
         <Spin size="large" />
       </div>
@@ -183,7 +183,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="fade-in">
       <h1>Smart Grid Dashboard</h1>
-      
+
       {/* Connection Status Alert */}
       {!isConnected && (
         <Alert
@@ -254,7 +254,7 @@ const Dashboard: React.FC = () => {
               value={metrics.renewableGeneration}
               precision={1}
               suffix="kWh"
-              prefix={<SolarOutlined />}
+              prefix={<SunOutlined />}
               valueStyle={{ color: '#faad14' }}
             />
             <div style={{ marginTop: 8 }}>
@@ -275,9 +275,9 @@ const Dashboard: React.FC = () => {
               valueStyle={{ color: '#722ed1' }}
             />
             <div style={{ marginTop: 8 }}>
-              <Progress 
-                percent={100} 
-                size="small" 
+              <Progress
+                percent={100}
+                size="small"
                 status="active"
                 showInfo={false}
               />
@@ -317,8 +317,8 @@ const Dashboard: React.FC = () => {
                   value={50.02}
                   precision={2}
                   suffix="Hz"
-                  valueStyle={{ 
-                    color: Math.abs(50.02 - 50.0) < 0.1 ? '#3f8600' : '#cf1322' 
+                  valueStyle={{
+                    color: Math.abs(50.02 - 50.0) < 0.1 ? '#3f8600' : '#cf1322'
                   }}
                 />
               </Col>
@@ -352,21 +352,21 @@ const Dashboard: React.FC = () => {
             <Card title="Recent Data Updates" size="small">
               <div style={{ maxHeight: 200, overflowY: 'auto' }}>
                 {messages.slice(0, 5).map((message, index) => (
-                  <div key={index} style={{ 
-                    padding: '8px 0', 
-                    borderBottom: index < 4 ? '1px solid #f0f0f0' : 'none' 
+                  <div key={index} style={{
+                    padding: '8px 0',
+                    borderBottom: index < 4 ? '1px solid #f0f0f0' : 'none'
                   }}>
                     <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
                       {message.timestamp.toLocaleTimeString()} - {message.topic}
                     </div>
                     <div style={{ fontSize: '14px', marginTop: '4px' }}>
-                      {message.topic.includes('meters') && 
+                      {message.topic.includes('meters') &&
                         `Energy: ${message.payload.active_energy || 0} kWh, Power: ${message.payload.active_power || 0} kW`
                       }
-                      {message.topic.includes('solar') && 
+                      {message.topic.includes('solar') &&
                         `Solar: ${message.payload.power_output_kw || 0} kW`
                       }
-                      {message.topic.includes('wind') && 
+                      {message.topic.includes('wind') &&
                         `Wind: ${message.payload.power_output_kw || 0} kW`
                       }
                     </div>
