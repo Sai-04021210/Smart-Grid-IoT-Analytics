@@ -5,7 +5,7 @@ import {
   DashboardOutlined,
   ThunderboltOutlined,
   LineChartOutlined,
-  SolarOutlined,
+  SunOutlined,
   DollarOutlined,
   ApiOutlined,
   BarChartOutlined,
@@ -37,7 +37,7 @@ const Sidebar: React.FC = () => {
     },
     {
       key: '/renewable',
-      icon: <SolarOutlined />,
+      icon: <SunOutlined />,
       label: 'Renewable Energy',
     },
     {
@@ -94,7 +94,7 @@ const Sidebar: React.FC = () => {
           Smart Grid
         </div>
       </div>
-      
+
       <Menu
         theme="dark"
         mode="inline"
