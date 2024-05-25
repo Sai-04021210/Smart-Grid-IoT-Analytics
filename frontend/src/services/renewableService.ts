@@ -18,7 +18,18 @@ export const renewableService = {
     source_id?: string
     hours?: number
   }): Promise<SolarGeneration[]> => {
-    return api.get('/api/v1/renewable/solar/generation', { params })
+    // Backend uses panel_id instead of source_id, and limit instead of hours
+    const apiParams: any = {}
+    if (params?.source_id) {
+      apiParams.panel_id = params.source_id
+    }
+    if (params?.hours) {
+      // Approximate: assume 1 reading per minute, so hours * 60
+      apiParams.limit = Math.min(params.hours * 60, 1000)
+    } else {
+      apiParams.limit = 100
+    }
+    return api.get('/api/v1/renewable/solar/generation', { params: apiParams })
   },
 
   /**
@@ -28,7 +39,18 @@ export const renewableService = {
     source_id?: string
     hours?: number
   }): Promise<WindGeneration[]> => {
-    return api.get('/api/v1/renewable/wind/generation', { params })
+    // Backend uses turbine_id instead of source_id, and limit instead of hours
+    const apiParams: any = {}
+    if (params?.source_id) {
+      apiParams.turbine_id = params.source_id
+    }
+    if (params?.hours) {
+      // Approximate: assume 1 reading per minute, so hours * 60
+      apiParams.limit = Math.min(params.hours * 60, 1000)
+    } else {
+      apiParams.limit = 100
+    }
+    return api.get('/api/v1/renewable/wind/generation', { params: apiParams })
   },
 
   /**
@@ -37,7 +59,16 @@ export const renewableService = {
   getRenewableSummary: async (params?: {
     hours?: number
   }): Promise<RenewableSummary> => {
-    return api.get('/api/v1/renewable/summary', { params })
+    // Backend uses 'period' parameter: hour, day, week, month
+    // Map hours to period
+    let period = 'day' // default
+    if (params?.hours) {
+      if (params.hours <= 24) period = 'hour'
+      else if (params.hours <= 168) period = 'day' // 7 days
+      else if (params.hours <= 720) period = 'week' // 30 days
+      else period = 'month'
+    }
+    return api.get('/api/v1/renewable/summary', { params: { period } })
   },
 
   /**

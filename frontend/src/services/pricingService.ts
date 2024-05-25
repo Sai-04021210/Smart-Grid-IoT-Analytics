@@ -33,12 +33,16 @@ export const pricingService = {
   },
 
   /**
-   * Get dynamic pricing history
+   * Get dynamic pricing history (optimization data)
    */
   getDynamicPricing: async (params?: {
     hours?: number
   }): Promise<DynamicPricing[]> => {
-    return api.get('/api/v1/pricing/dynamic', { params })
+    // Backend uses 'optimization' endpoint for dynamic pricing history
+    const limit = params?.hours ? params.hours * 4 : 100 // Approximate records per hour
+    return api.get('/api/v1/pricing/optimization', {
+      params: { limit }
+    })
   },
 
   /**
