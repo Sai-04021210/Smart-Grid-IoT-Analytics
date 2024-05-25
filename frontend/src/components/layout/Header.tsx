@@ -1,5 +1,5 @@
-import React from 'react'
-import { Layout, Space, Badge, Button, Dropdown, Avatar, Typography } from 'antd'
+import React, { useState } from 'react'
+import { Layout, Space, Badge, Button, Dropdown, Avatar, Typography, Modal, message } from 'antd'
 import {
   BellOutlined,
   UserOutlined,
@@ -8,13 +8,16 @@ import {
   WifiOutlined,
   DisconnectOutlined
 } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import { useMQTT } from '../../contexts/MQTTContext'
 
 const { Header: AntHeader } = Layout
 const { Text } = Typography
 
 const Header: React.FC = () => {
-  const { isConnected } = useMQTT()
+  const { isConnected, messages } = useMQTT()
+  const navigate = useNavigate()
+  const [notificationModalVisible, setNotificationModalVisible] = useState(false)
 
   const userMenuItems = [
     {
@@ -41,18 +44,34 @@ const Header: React.FC = () => {
   const handleUserMenuClick = ({ key }: { key: string }) => {
     switch (key) {
       case 'profile':
-        console.log('Navigate to profile')
+        message.info('Profile page coming soon!')
         break
       case 'settings':
-        console.log('Navigate to settings')
+        navigate('/settings')
         break
       case 'logout':
-        console.log('Logout user')
+        Modal.confirm({
+          title: 'Logout',
+          content: 'Are you sure you want to logout?',
+          okText: 'Logout',
+          okType: 'danger',
+          onOk: () => {
+            message.success('Logged out successfully')
+            // TODO: Implement actual logout logic
+          }
+        })
         break
       default:
         break
     }
   }
+
+  const handleNotificationClick = () => {
+    setNotificationModalVisible(true)
+  }
+
+  // Get recent MQTT messages as notifications
+  const recentNotifications = messages.slice(0, 10)
 
   return (
     <AntHeader
@@ -113,11 +132,12 @@ const Header: React.FC = () => {
         </div>
 
         {/* Notifications */}
-        <Badge count={3} size="small">
+        <Badge count={recentNotifications.length} size="small">
           <Button
             type="text"
             icon={<BellOutlined />}
             style={{ border: 'none' }}
+            onClick={handleNotificationClick}
           />
         </Badge>
 
@@ -158,6 +178,63 @@ const Header: React.FC = () => {
           }
         `}
       </style>
+
+      {/* Notifications Modal */}
+      <Modal
+        title="Recent Data Updates"
+        open={notificationModalVisible}
+        onCancel={() => setNotificationModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setNotificationModalVisible(false)}>
+            Close
+          </Button>
+        ]}
+        width={600}
+      >
+        {recentNotifications.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '20px', color: '#8c8c8c' }}>
+            No recent notifications
+          </div>
+        ) : (
+          <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+            {recentNotifications.map((notification, index) => (
+              <div
+                key={index}
+                style={{
+                  padding: '12px',
+                  borderBottom: index < recentNotifications.length - 1 ? '1px solid #f0f0f0' : 'none',
+                  marginBottom: 8
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <Text strong style={{ fontSize: 13 }}>
+                    {notification.topic}
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {notification.timestamp.toLocaleTimeString()}
+                  </Text>
+                </div>
+                <div style={{ fontSize: 12, color: '#595959' }}>
+                  {notification.topic.includes('meters') && notification.payload.active_power && (
+                    <>
+                      <span>Power: {notification.payload.active_power.toFixed(2)} kW</span>
+                      <span style={{ marginLeft: 16 }}>
+                        Energy: {notification.payload.active_energy?.toFixed(2) || 0} kWh
+                      </span>
+                    </>
+                  )}
+                  {notification.topic.includes('solar') && notification.payload.power_output_kw !== undefined && (
+                    <span>Solar: {notification.payload.power_output_kw.toFixed(2)} kW</span>
+                  )}
+                  {notification.topic.includes('wind') && notification.payload.power_output_kw !== undefined && (
+                    <span>Wind: {notification.payload.power_output_kw.toFixed(2)} kW</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
     </AntHeader>
   )
 }
