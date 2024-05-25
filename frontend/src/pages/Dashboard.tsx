@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { Row, Col, Card, Statistic, Progress, Alert, Spin } from 'antd'
+import React, { useState, useEffect, useMemo } from 'react'
+import { Row, Col, Card, Statistic, Progress, Alert, Spin, Button } from 'antd'
 import {
   ThunderboltOutlined,
   SunOutlined,
   DollarOutlined,
   ApiOutlined,
   ArrowUpOutlined,
-  ArrowDownOutlined
+  ArrowDownOutlined,
+  ReloadOutlined
 } from '@ant-design/icons'
 import { Line, Doughnut } from 'react-chartjs-2'
 import {
@@ -21,6 +22,10 @@ import {
   ArcElement
 } from 'chart.js'
 import { useMQTT } from '../contexts/MQTTContext'
+import { useConsumptionSummary, useHourlyConsumption } from '../hooks/useEnergy'
+import { useCurrentPrice } from '../hooks/usePricing'
+import { useRenewableSummary } from '../hooks/useRenewable'
+import { useMeters } from '../hooks/useMeters'
 
 // Register Chart.js components
 ChartJS.register(
@@ -46,95 +51,134 @@ interface DashboardMetrics {
 }
 
 const Dashboard: React.FC = () => {
-  const [metrics, setMetrics] = useState<DashboardMetrics>({
-    totalConsumption: 0,
-    currentPrice: 0,
-    renewableGeneration: 0,
-    activeMeters: 0,
-    gridStatus: 'normal',
-    consumptionChange: 0,
-    priceChange: 0,
-    renewableChange: 0
-  })
-  const [loading, setLoading] = useState(true)
-  const [energyData, setEnergyData] = useState<any>(null)
-  const [renewableData, setRenewableData] = useState<any>(null)
-
   const { isConnected, messages } = useMQTT()
 
-  useEffect(() => {
-    // Simulate loading dashboard data
-    const loadDashboardData = async () => {
-      try {
-        // Simulate API calls
-        await new Promise(resolve => setTimeout(resolve, 1000))
+  // Fetch data using custom hooks
+  const { data: consumptionSummary, isLoading: loadingConsumption, refetch: refetchConsumption } = useConsumptionSummary()
+  const { data: hourlyData, isLoading: loadingHourly, refetch: refetchHourly } = useHourlyConsumption({ hours: 24 })
+  const { data: currentPrice, isLoading: loadingPrice, refetch: refetchPrice } = useCurrentPrice()
+  const { data: renewableSummary, isLoading: loadingRenewable, refetch: refetchRenewable } = useRenewableSummary({ hours: 24 })
+  const { data: meters, isLoading: loadingMeters, refetch: refetchMeters } = useMeters({ is_active: true })
 
-        // Mock data - in real app, fetch from API
-        setMetrics({
-          totalConsumption: 1247.5,
-          currentPrice: 0.145,
-          renewableGeneration: 324.8,
-          activeMeters: 5,
-          gridStatus: 'normal',
-          consumptionChange: 5.2,
-          priceChange: -2.1,
-          renewableChange: 12.3
-        })
+  const loading = loadingConsumption || loadingHourly || loadingPrice || loadingRenewable || loadingMeters
 
-        // Mock chart data
-        setEnergyData({
-          labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
-          datasets: [
-            {
-              label: 'Energy Consumption (kWh)',
-              data: [850, 720, 950, 1100, 1400, 1200],
-              borderColor: 'rgb(75, 192, 192)',
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              tension: 0.4
-            }
-          ]
-        })
+  // Calculate metrics from API data
+  const metrics = useMemo(() => {
+    const totalConsumption = consumptionSummary?.total_consumption || 0
+    const price = currentPrice?.price_per_kwh || 0
+    const renewableGen = renewableSummary?.total_renewable_energy || 0
+    const activeMeters = meters?.filter(m => m.is_active).length || 0
 
-        setRenewableData({
-          labels: ['Solar', 'Wind', 'Grid'],
-          datasets: [
-            {
-              data: [45, 25, 30],
-              backgroundColor: [
-                '#FFD700',
-                '#87CEEB',
-                '#FF6B6B'
-              ],
-              borderWidth: 2
-            }
-          ]
-        })
+    return {
+      totalConsumption,
+      currentPrice: price,
+      renewableGeneration: renewableGen,
+      activeMeters,
+      gridStatus: 'normal',
+      consumptionChange: 0, // TODO: Calculate from historical data
+      priceChange: 0, // TODO: Calculate from historical data
+      renewableChange: renewableSummary?.renewable_percentage || 0
+    }
+  }, [consumptionSummary, currentPrice, renewableSummary, meters])
 
-        setLoading(false)
-      } catch (error) {
-        console.error('Error loading dashboard data:', error)
-        setLoading(false)
-      }
+  // Prepare chart data from hourly consumption
+  const energyData = useMemo(() => {
+    if (!hourlyData || hourlyData.length === 0) {
+      return null
     }
 
-    loadDashboardData()
-  }, [])
+    // Sort by hour and take last 24 hours
+    const sortedData = [...hourlyData].sort((a, b) =>
+      new Date(a.hour).getTime() - new Date(b.hour).getTime()
+    ).slice(-24)
 
-  // Update metrics based on MQTT messages
+    return {
+      labels: sortedData.map(d => {
+        const date = new Date(d.hour)
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+      }),
+      datasets: [
+        {
+          label: 'Energy Consumption (kWh)',
+          data: sortedData.map(d => d.total_consumption),
+          borderColor: 'rgb(75, 192, 192)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          tension: 0.4
+        }
+      ]
+    }
+  }, [hourlyData])
+
+  // Prepare renewable energy mix chart
+  const renewableData = useMemo(() => {
+    if (!renewableSummary) {
+      return null
+    }
+
+    const solarEnergy = renewableSummary.solar?.total_energy_kwh || 0
+    const windEnergy = renewableSummary.wind?.total_energy_kwh || 0
+    const totalRenewable = solarEnergy + windEnergy
+    const gridEnergy = Math.max(0, (consumptionSummary?.total_consumption || 0) - totalRenewable)
+
+    const total = solarEnergy + windEnergy + gridEnergy
+
+    if (total === 0) {
+      return null
+    }
+
+    return {
+      labels: ['Solar', 'Wind', 'Grid'],
+      datasets: [
+        {
+          data: [
+            ((solarEnergy / total) * 100).toFixed(1),
+            ((windEnergy / total) * 100).toFixed(1),
+            ((gridEnergy / total) * 100).toFixed(1)
+          ],
+          backgroundColor: [
+            '#FFD700',
+            '#87CEEB',
+            '#FF6B6B'
+          ],
+          borderWidth: 2
+        }
+      ]
+    }
+  }, [renewableSummary, consumptionSummary])
+
+  // Refresh all data
+  const handleRefresh = () => {
+    refetchConsumption()
+    refetchHourly()
+    refetchPrice()
+    refetchRenewable()
+    refetchMeters()
+  }
+
+  // Update data when MQTT messages arrive
   useEffect(() => {
     if (messages.length > 0) {
       const latestMessage = messages[0]
 
-      if (latestMessage.topic.includes('meters') && latestMessage.topic.includes('data')) {
-        // Update consumption metrics
-        const consumption = latestMessage.payload.active_energy || 0
-        setMetrics(prev => ({
-          ...prev,
-          totalConsumption: prev.totalConsumption + consumption
-        }))
+      // Refetch data when new readings arrive
+      if (latestMessage.topic.includes('meters') ||
+          latestMessage.topic.includes('solar') ||
+          latestMessage.topic.includes('wind')) {
+        // Debounce refetch to avoid too many requests
+        const timer = setTimeout(() => {
+          refetchConsumption()
+          refetchRenewable()
+        }, 2000)
+
+        return () => clearTimeout(timer)
+      }
+
+      // Update price when pricing updates arrive
+      if (latestMessage.topic.includes('pricing')) {
+        refetchPrice()
       }
     }
-  }, [messages])
+  }, [messages, refetchConsumption, refetchRenewable, refetchPrice])
 
   const chartOptions = {
     responsive: true,
@@ -173,16 +217,31 @@ const Dashboard: React.FC = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '400px'
+        height: '400px',
+        flexDirection: 'column',
+        gap: '16px'
       }}>
         <Spin size="large" />
+        <div style={{ color: '#8c8c8c' }}>Loading dashboard data...</div>
       </div>
     )
   }
 
+  // Show message if no data available
+  const hasNoData = !consumptionSummary && !currentPrice && !renewableSummary && !meters
+
   return (
     <div className="fade-in">
-      <h1>Smart Grid Dashboard</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <h1>Smart Grid Dashboard</h1>
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={handleRefresh}
+          loading={loading}
+        >
+          Refresh
+        </Button>
+      </div>
 
       {/* Connection Status Alert */}
       {!isConnected && (
@@ -190,6 +249,17 @@ const Dashboard: React.FC = () => {
           message="MQTT Disconnected"
           description="Real-time data updates are not available. Please check your connection."
           type="warning"
+          showIcon
+          style={{ marginBottom: 24 }}
+        />
+      )}
+
+      {/* No Data Alert */}
+      {hasNoData && (
+        <Alert
+          message="No Data Available"
+          description="No energy data found. Please ensure the data generator is running and meters are registered."
+          type="info"
           showIcon
           style={{ marginBottom: 24 }}
         />
@@ -290,17 +360,37 @@ const Dashboard: React.FC = () => {
       {/* Charts */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={16}>
-          <Card title="Energy Consumption Trend" className="chart-container">
-            {energyData && (
+          <Card title="Energy Consumption Trend (Last 24 Hours)" className="chart-container">
+            {energyData ? (
               <Line data={energyData} options={chartOptions} />
+            ) : (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 300,
+                color: '#8c8c8c'
+              }}>
+                No consumption data available
+              </div>
             )}
           </Card>
         </Col>
 
         <Col xs={24} lg={8}>
-          <Card title="Energy Mix" className="chart-container-small">
-            {renewableData && (
+          <Card title="Energy Mix (%)" className="chart-container-small">
+            {renewableData ? (
               <Doughnut data={renewableData} options={doughnutOptions} />
+            ) : (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 300,
+                color: '#8c8c8c'
+              }}>
+                No renewable data available
+              </div>
             )}
           </Card>
         </Col>

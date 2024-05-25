@@ -27,7 +27,7 @@ services:
     image: eclipse-mosquitto:2.0.18
     container_name: smartgrid_mqtt
     ports:
-      - "1883:1883"
+      - "1885:1883"
       - "9001:9001"
     volumes:
       - ./mqtt-broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
