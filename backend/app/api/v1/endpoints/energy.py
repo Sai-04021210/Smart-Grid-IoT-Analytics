@@ -10,7 +10,9 @@ from sqlalchemy import func
 
 from app.core.database import get_db
 from app.models.smart_meter import EnergyReading, SmartMeter
+from app.models.user import User
 from app.schemas.energy import EnergyReadingResponse, EnergyConsumptionSummary
+from app.core.security import get_current_user
 
 router = APIRouter()
 
@@ -21,7 +23,8 @@ async def get_energy_consumption(
     start_date: Optional[datetime] = Query(None, description="Start date for data range"),
     end_date: Optional[datetime] = Query(None, description="End date for data range"),
     limit: int = Query(100, le=1000, description="Maximum number of records"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get energy consumption data"""
     
@@ -47,7 +50,8 @@ async def get_energy_consumption(
 async def get_consumption_summary(
     meter_id: Optional[str] = Query(None, description="Filter by meter ID"),
     period: str = Query("day", regex="^(hour|day|week|month)$", description="Aggregation period"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get energy consumption summary"""
     
@@ -89,7 +93,8 @@ async def get_consumption_summary(
 async def get_smart_meters(
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     meter_type: Optional[str] = Query(None, description="Filter by meter type"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get list of smart meters"""
     
@@ -120,7 +125,8 @@ async def get_smart_meters(
 async def get_hourly_consumption(
     meter_id: Optional[str] = Query(None, description="Filter by meter ID"),
     days: int = Query(7, le=30, description="Number of days to include"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get hourly energy consumption aggregated data"""
     
@@ -156,7 +162,8 @@ async def get_hourly_consumption(
 async def get_peak_hours(
     meter_id: Optional[str] = Query(None, description="Filter by meter ID"),
     days: int = Query(30, le=90, description="Number of days to analyze"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get peak consumption hours analysis"""
     

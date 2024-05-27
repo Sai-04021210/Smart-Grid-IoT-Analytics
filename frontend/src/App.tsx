@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { Layout } from 'antd'
 import Sidebar from './components/layout/Sidebar'
@@ -17,11 +17,17 @@ import './App.css'
 const { Content } = Layout
 
 function App() {
+  const [collapsed, setCollapsed] = useState(false)
+
   return (
     <MQTTProvider>
       <Layout style={{ minHeight: '100vh' }}>
-        <Sidebar />
-        <Layout style={{ marginLeft: 200, minHeight: '100vh' }}>
+        <Sidebar collapsed={collapsed} onCollapse={setCollapsed} />
+        <Layout style={{
+          marginLeft: collapsed ? 80 : 200,
+          minHeight: '100vh',
+          transition: 'margin-left 0.2s'
+        }}>
           <Header />
           <Content style={{
             padding: '16px',

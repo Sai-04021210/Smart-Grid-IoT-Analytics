@@ -8,13 +8,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.models.user import User
 from app.services.pricing_service import PricingService
 from app.models.pricing import DynamicPricing, EnergyPrice
 from app.schemas.pricing import (
-    CurrentPriceResponse, 
-    PriceForecastResponse, 
+    CurrentPriceResponse,
+    PriceForecastResponse,
     PricingOptimizationResponse
 )
+from app.core.security import get_current_user
 
 router = APIRouter()
 pricing_service = PricingService()
@@ -23,7 +25,8 @@ pricing_service = PricingService()
 @router.get("/current", response_model=CurrentPriceResponse)
 async def get_current_price(
     meter_type: str = Query("residential", regex="^(residential|commercial|industrial)$"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get current energy price"""
     try:
@@ -36,7 +39,8 @@ async def get_current_price(
 @router.get("/forecast", response_model=List[PriceForecastResponse])
 async def get_price_forecast(
     hours_ahead: int = Query(24, ge=1, le=168, description="Hours to forecast"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get price forecast for next N hours"""
     try:
@@ -51,7 +55,8 @@ async def get_pricing_optimization(
     start_date: Optional[datetime] = Query(None, description="Start date for optimization data"),
     end_date: Optional[datetime] = Query(None, description="End date for optimization data"),
     limit: int = Query(100, le=1000, description="Maximum number of records"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get pricing optimization results"""
     
@@ -83,7 +88,8 @@ async def get_pricing_optimization(
 
 @router.post("/optimize")
 async def trigger_pricing_optimization(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Manually trigger pricing optimization"""
     try:
@@ -97,7 +103,8 @@ async def trigger_pricing_optimization(
 async def get_pricing_history(
     days: int = Query(30, ge=1, le=365, description="Number of days of history"),
     meter_type: str = Query("residential", regex="^(residential|commercial|industrial)$"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get historical pricing data"""
     
@@ -129,7 +136,9 @@ async def get_pricing_history(
 
 
 @router.get("/tiers")
-async def get_pricing_tiers():
+async def get_pricing_tiers(
+    current_user: User = Depends(get_current_user)
+):
     """Get current pricing tier information"""
     current_hour = datetime.utcnow().hour
     
@@ -168,7 +177,8 @@ async def get_pricing_tiers():
 
 @router.get("/market-conditions")
 async def get_market_conditions(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get current market conditions affecting pricing"""
     

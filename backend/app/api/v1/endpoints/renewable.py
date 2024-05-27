@@ -9,9 +9,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.core.database import get_db
+from app.models.user import User
 from app.models.renewable_energy import (
     SolarPanel, WindTurbine, RenewableEnergyGeneration, RenewableForecast
 )
+from app.core.security import get_current_user
 
 router = APIRouter()
 
@@ -22,7 +24,8 @@ async def get_solar_generation(
     start_date: Optional[datetime] = Query(None, description="Start date"),
     end_date: Optional[datetime] = Query(None, description="End date"),
     limit: int = Query(100, le=1000, description="Maximum records"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get solar generation data"""
     
@@ -65,7 +68,8 @@ async def get_wind_generation(
     start_date: Optional[datetime] = Query(None, description="Start date"),
     end_date: Optional[datetime] = Query(None, description="End date"),
     limit: int = Query(100, le=1000, description="Maximum records"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get wind generation data"""
     
@@ -107,7 +111,8 @@ async def get_wind_generation(
 async def get_renewable_forecasts(
     source_type: str = Query(..., regex="^(solar|wind)$", description="Source type"),
     hours_ahead: int = Query(24, ge=1, le=168, description="Hours to forecast"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get renewable energy forecasts"""
     
@@ -140,7 +145,8 @@ async def get_renewable_forecasts(
 @router.get("/summary")
 async def get_renewable_summary(
     period: str = Query("day", regex="^(hour|day|week|month)$"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get renewable energy generation summary"""
     
@@ -199,7 +205,8 @@ async def get_renewable_summary(
 @router.get("/panels")
 async def get_solar_panels(
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get solar panel information"""
     
@@ -231,7 +238,8 @@ async def get_solar_panels(
 @router.get("/turbines")
 async def get_wind_turbines(
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get wind turbine information"""
     

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Layout, Menu } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
@@ -10,12 +10,19 @@ import {
   ApiOutlined,
   BarChartOutlined,
   SettingOutlined,
-  HomeOutlined
+  HomeOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined
 } from '@ant-design/icons'
 
 const { Sider } = Layout
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  collapsed: boolean
+  onCollapse: (collapsed: boolean) => void
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -68,7 +75,12 @@ const Sidebar: React.FC = () => {
 
   return (
     <Sider
+      collapsible
+      collapsed={collapsed}
+      onCollapse={onCollapse}
       width={200}
+      collapsedWidth={80}
+      breakpoint="lg"
       style={{
         overflow: 'auto',
         height: '100vh',
@@ -79,6 +91,17 @@ const Sidebar: React.FC = () => {
         top: 0,
         zIndex: 100,
       }}
+      trigger={
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '12px 0',
+          fontSize: '16px'
+        }}>
+          {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        </div>
+      }
     >
       <div
         style={{
@@ -88,14 +111,19 @@ const Sidebar: React.FC = () => {
           justifyContent: 'center',
           background: '#002140',
           borderBottom: '1px solid #1890ff',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          overflow: 'hidden'
         }}
         onClick={() => navigate('/dashboard')}
       >
-        <div style={{ color: '#fff', fontSize: '16px', fontWeight: 'bold' }}>
-          <HomeOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-          Smart Grid IoT
-        </div>
+        {!collapsed ? (
+          <div style={{ color: '#fff', fontSize: '16px', fontWeight: 'bold' }}>
+            <HomeOutlined style={{ marginRight: 8, color: '#1890ff' }} />
+            Smart Grid IoT
+          </div>
+        ) : (
+          <HomeOutlined style={{ color: '#1890ff', fontSize: '24px' }} />
+        )}
       </div>
 
       <Menu

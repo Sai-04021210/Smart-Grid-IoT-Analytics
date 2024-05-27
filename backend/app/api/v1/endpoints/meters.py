@@ -10,7 +10,9 @@ from sqlalchemy import func
 
 from app.core.database import get_db
 from app.models.smart_meter import SmartMeter, EnergyReading
+from app.models.user import User
 from app.schemas.energy import SmartMeterCreate, SmartMeterResponse, EnergyReadingCreate
+from app.core.security import get_current_user, require_admin
 
 router = APIRouter()
 
@@ -18,7 +20,8 @@ router = APIRouter()
 @router.post("/register", response_model=SmartMeterResponse)
 async def register_smart_meter(
     meter_data: SmartMeterCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
 ):
     """Register a new smart meter"""
     
@@ -55,7 +58,8 @@ async def register_smart_meter(
 @router.post("/data")
 async def submit_meter_reading(
     reading_data: EnergyReadingCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Submit energy reading data"""
     
@@ -93,7 +97,8 @@ async def get_smart_meters(
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     meter_type: Optional[str] = Query(None, description="Filter by meter type"),
     location: Optional[str] = Query(None, description="Filter by location"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get list of smart meters"""
     
@@ -115,15 +120,16 @@ async def get_smart_meters(
 @router.get("/{meter_id}", response_model=SmartMeterResponse)
 async def get_smart_meter(
     meter_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get specific smart meter details"""
-    
+
     meter = db.query(SmartMeter).filter(SmartMeter.meter_id == meter_id).first()
-    
+
     if not meter:
         raise HTTPException(status_code=404, detail="Meter not found")
-    
+
     return meter
 
 
@@ -131,7 +137,8 @@ async def get_smart_meter(
 async def update_smart_meter(
     meter_id: str,
     meter_data: SmartMeterCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
 ):
     """Update smart meter information"""
     
@@ -155,27 +162,29 @@ async def update_smart_meter(
 @router.delete("/{meter_id}")
 async def deactivate_smart_meter(
     meter_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
 ):
     """Deactivate a smart meter"""
-    
+
     meter = db.query(SmartMeter).filter(SmartMeter.meter_id == meter_id).first()
-    
+
     if not meter:
         raise HTTPException(status_code=404, detail="Meter not found")
-    
+
     meter.is_active = False
     meter.updated_at = datetime.utcnow()
-    
+
     db.commit()
-    
+
     return {"message": f"Meter {meter_id} deactivated successfully"}
 
 
 @router.get("/{meter_id}/status")
 async def get_meter_status(
     meter_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get meter status and health information"""
     
@@ -232,7 +241,8 @@ async def get_meter_readings(
     start_date: Optional[datetime] = Query(None, description="Start date"),
     end_date: Optional[datetime] = Query(None, description="End date"),
     limit: int = Query(100, le=1000, description="Maximum records"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get readings for a specific meter"""
     
@@ -258,7 +268,8 @@ async def get_meter_readings(
 async def get_meter_statistics(
     meter_id: str,
     days: int = Query(30, ge=1, le=365, description="Number of days"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get statistical analysis for a meter"""
     

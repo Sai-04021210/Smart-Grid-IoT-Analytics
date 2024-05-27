@@ -8,9 +8,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.models.user import User
 from app.models.smart_meter import EnergyPrediction
 from app.schemas.energy import EnergyPredictionResponse
 from app.ml.lstm_predictor import LSTMPredictor
+from app.core.security import get_current_user
 
 router = APIRouter()
 
@@ -19,7 +21,8 @@ router = APIRouter()
 async def get_energy_predictions(
     meter_id: Optional[str] = Query(None, description="Filter by meter ID"),
     hours_ahead: int = Query(24, ge=1, le=168, description="Hours to predict"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get energy consumption predictions"""
     
@@ -42,7 +45,8 @@ async def get_energy_predictions(
 @router.post("/energy/generate")
 async def generate_energy_predictions(
     meter_id: Optional[str] = Query(None, description="Generate for specific meter"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Generate new energy predictions using LSTM model"""
     
