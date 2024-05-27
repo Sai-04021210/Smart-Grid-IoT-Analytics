@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
-import { Layout, Space, Badge, Button, Dropdown, Avatar, Typography, Modal, message } from 'antd'
+import { Layout, Space, Badge, Button, Dropdown, Avatar, Typography, Modal, message, Tag } from 'antd'
 import {
   BellOutlined,
   UserOutlined,
   SettingOutlined,
   LogoutOutlined,
   WifiOutlined,
-  DisconnectOutlined
+  DisconnectOutlined,
+  CrownOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useMQTT } from '../../contexts/MQTTContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 const { Header: AntHeader } = Layout
 const { Text } = Typography
@@ -17,6 +19,7 @@ const { Text } = Typography
 const Header: React.FC = () => {
   const navigate = useNavigate()
   const [notificationModalVisible, setNotificationModalVisible] = useState(false)
+  const { user, logout } = useAuth()
 
   // Try to get MQTT context, but don't fail if it's not available
   let isConnected = false
@@ -67,8 +70,7 @@ const Header: React.FC = () => {
           okText: 'Logout',
           okType: 'danger',
           onOk: () => {
-            message.success('Logged out successfully')
-            // TODO: Implement actual logout logic
+            logout()
           }
         })
         break
@@ -168,7 +170,21 @@ const Header: React.FC = () => {
                 icon={<UserOutlined />}
                 style={{ backgroundColor: '#1890ff' }}
               />
-              <Text style={{ color: '#262626' }}>Admin</Text>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Text style={{ color: '#262626', fontWeight: 500 }}>
+                    {user?.full_name || user?.username || 'User'}
+                  </Text>
+                  {user?.role === 'admin' && (
+                    <Tag color="gold" icon={<CrownOutlined />} style={{ margin: 0, fontSize: 10 }}>
+                      Admin
+                    </Tag>
+                  )}
+                </div>
+                <Text type="secondary" style={{ fontSize: 11 }}>
+                  {user?.email}
+                </Text>
+              </div>
             </Space>
           </Button>
         </Dropdown>

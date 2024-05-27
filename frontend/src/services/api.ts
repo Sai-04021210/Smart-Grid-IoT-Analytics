@@ -21,6 +21,12 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor - add auth token, logging, etc.
 apiClient.interceptors.request.use(
   (config: AxiosRequestConfig) => {
+    // Add auth token if available
+    const token = localStorage.getItem('smart_grid_token')
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+
     // Add timestamp to prevent caching
     if (config.params) {
       config.params._t = Date.now()
@@ -63,6 +69,12 @@ apiClient.interceptors.response.use(
           break
         case 401:
           toast.error('Unauthorized. Please log in.')
+          // Clear token and redirect to login
+          localStorage.removeItem('smart_grid_token')
+          localStorage.removeItem('smart_grid_user')
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login'
+          }
           break
         case 403:
           toast.error('Access forbidden.')
