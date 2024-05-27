@@ -97,7 +97,12 @@ const SmartMeters: React.FC = () => {
     if (!meter.is_active) return 'maintenance'
     if (!meter.last_communication) return 'offline'
 
-    const lastComm = new Date(meter.last_communication).getTime()
+    // Parse timestamp as UTC by adding 'Z' if not present
+    const timestamp = meter.last_communication.endsWith('Z')
+      ? meter.last_communication
+      : meter.last_communication + 'Z'
+
+    const lastComm = new Date(timestamp).getTime()
     const now = Date.now()
     const minutesSinceLastComm = (now - lastComm) / (1000 * 60)
 
