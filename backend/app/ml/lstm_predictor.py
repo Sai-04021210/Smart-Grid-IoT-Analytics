@@ -40,12 +40,15 @@ class LSTMPredictor:
         
         # Model paths
         self.model_dir = "/app/ml-models/lstm"
-        self.model_path = f"{self.model_dir}/lstm_energy_model.h5"
+        self.model_path = f"{self.model_dir}/lstm_energy_model.keras"
         self.scaler_path = f"{self.model_dir}/energy_scaler.pkl"
         self.feature_scaler_path = f"{self.model_dir}/feature_scaler.pkl"
-        
-        # Ensure model directory exists
-        os.makedirs(self.model_dir, exist_ok=True)
+
+        # Ensure model directory exists (only if not read-only)
+        try:
+            os.makedirs(self.model_dir, exist_ok=True)
+        except OSError:
+            pass  # Directory creation will be handled by training script
     
     def prepare_data(self, meter_id: Optional[str] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Prepare training data from database"""
@@ -89,7 +92,7 @@ class LSTMPredictor:
             df.set_index('timestamp', inplace=True)
             
             # Resample to hourly data and fill missing values
-            df_hourly = df.resample('H').agg({
+            df_hourly = df.resample('h').agg({
                 'active_energy': 'sum',
                 'active_power': 'mean',
                 'voltage_l1': 'mean',
@@ -99,7 +102,7 @@ class LSTMPredictor:
                 'day_of_week': 'first',
                 'month': 'first',
                 'is_weekend': 'first'
-            }).fillna(method='forward').fillna(0)
+            }).ffill().fillna(0)
             
             # Add weather features (simplified for demo)
             df_hourly['temperature'] = 20 + 10 * np.sin(2 * np.pi * df_hourly.index.hour / 24)
@@ -232,7 +235,14 @@ class LSTMPredictor:
         """Load trained model and scalers"""
         try:
             if os.path.exists(self.model_path):
-                self.model = load_model(self.model_path)
+                # Load model with compile=False to avoid metric issues
+                self.model = load_model(self.model_path, compile=False)
+                # Recompile with proper metrics
+                self.model.compile(
+                    optimizer='adam',
+                    loss='mse',
+                    metrics=['mae']
+                )
                 self.scaler = joblib.load(self.scaler_path)
                 self.feature_scaler = joblib.load(self.feature_scaler_path)
                 logger.info("Model loaded successfully")
