@@ -293,15 +293,22 @@ class SmartGridDataGenerator:
 
 if __name__ == "__main__":
     import sys
+    import os
 
-    # Get MQTT port from command line or use default
-    mqtt_port = 1885  # Default to Docker mapped port
+    # Get configuration from environment variables or command line
+    mqtt_broker = os.getenv("MQTT_BROKER_HOST", "localhost")
+    mqtt_port = int(os.getenv("MQTT_BROKER_PORT", "1885"))
+    interval = int(os.getenv("GENERATION_INTERVAL", "60"))
+
+    # Command line arguments override environment variables
     if len(sys.argv) > 1:
         try:
             mqtt_port = int(sys.argv[1])
         except ValueError:
-            logger.warning(f"Invalid port argument: {sys.argv[1]}, using default 1885")
+            logger.warning(f"Invalid port argument: {sys.argv[1]}, using {mqtt_port}")
 
-    logger.info(f"Using MQTT port: {mqtt_port}")
-    generator = SmartGridDataGenerator(mqtt_port=mqtt_port)
-    generator.run_continuous(interval=60)  # Generate data every minute for testing
+    logger.info(f"Connecting to MQTT broker at {mqtt_broker}:{mqtt_port}")
+    logger.info(f"Data generation interval: {interval} seconds")
+
+    generator = SmartGridDataGenerator(mqtt_broker=mqtt_broker, mqtt_port=mqtt_port)
+    generator.run_continuous(interval=interval)

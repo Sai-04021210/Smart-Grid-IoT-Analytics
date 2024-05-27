@@ -15,6 +15,7 @@ from app.core.database import engine, Base
 from app.api.v1.api import api_router
 from app.services.mqtt_service import MQTTService
 from app.services.scheduler_service import SchedulerService
+from app.init_data import initialize_database
 
 # Configure logging
 logging.basicConfig(
@@ -39,6 +40,12 @@ async def lifespan(app: FastAPI):
     # Create database tables
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created/verified")
+
+    # Initialize database with sample data
+    try:
+        initialize_database()
+    except Exception as e:
+        logger.warning(f"Database initialization warning: {e}")
 
     # Initialize MQTT service
     mqtt_service = MQTTService()
