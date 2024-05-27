@@ -15,9 +15,20 @@ const { Header: AntHeader } = Layout
 const { Text } = Typography
 
 const Header: React.FC = () => {
-  const { isConnected, messages } = useMQTT()
   const navigate = useNavigate()
   const [notificationModalVisible, setNotificationModalVisible] = useState(false)
+
+  // Try to get MQTT context, but don't fail if it's not available
+  let isConnected = false
+  let messages: any[] = []
+  try {
+    const mqtt = useMQTT()
+    isConnected = mqtt.isConnected
+    messages = mqtt.messages
+  } catch (error) {
+    // MQTT context not available, use defaults
+    console.log('MQTT context not available')
+  }
 
   const userMenuItems = [
     {

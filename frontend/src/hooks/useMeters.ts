@@ -111,12 +111,14 @@ export const useDeactivateMeter = () => {
 
 /**
  * Hook to fetch meter statistics
+ * Note: This endpoint doesn't exist yet in the backend, so we disable it
  */
 export const useMeterStats = () => {
   return useQuery(
     'meter-stats',
     () => meterService.getMeterStats(),
     {
+      enabled: false, // Disable until backend endpoint is implemented
       staleTime: 120000, // 2 minutes
       onError: (error) => {
         console.error('Error fetching meter stats:', error)

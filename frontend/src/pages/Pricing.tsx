@@ -183,22 +183,22 @@ const Pricing: React.FC = () => {
       render: (text: string, record: any) => (
         <Space>
           <Tag color={record.name === tiers?.current_tier ? 'green' : 'default'}>
-            {text}
+            {text.charAt(0).toUpperCase() + text.slice(1).replace('_', ' ')}
           </Tag>
           {record.name === tiers?.current_tier && <Text type="success">(Current)</Text>}
         </Space>
       )
     },
     {
-      title: 'Price',
-      dataIndex: 'price_per_kwh',
-      key: 'price_per_kwh',
-      render: (value: number) => `$${value.toFixed(3)}/kWh`
+      title: 'Price Multiplier',
+      dataIndex: 'multiplier',
+      key: 'multiplier',
+      render: (value: number) => value ? `${value.toFixed(2)}x` : 'N/A'
     },
     {
       title: 'Time Range',
-      dataIndex: 'time_range',
-      key: 'time_range',
+      dataIndex: 'hours',
+      key: 'hours',
       render: (value: string) => value || 'All day'
     },
     {
@@ -421,7 +421,10 @@ const Pricing: React.FC = () => {
             ) : tiers?.tiers ? (
               <Table
                 columns={tierColumns}
-                dataSource={tiers.tiers}
+                dataSource={Object.entries(tiers.tiers).map(([name, data]: [string, any]) => ({
+                  name,
+                  ...data
+                }))}
                 rowKey="name"
                 pagination={false}
                 size="middle"

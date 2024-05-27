@@ -5,18 +5,17 @@ Database configuration and session management
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import NullPool
 import logging
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Create database engine
+# Create database engine with NullPool to avoid connection pool issues
 engine = create_engine(
     settings.DATABASE_URL,
-    poolclass=StaticPool,
-    pool_pre_ping=True,
+    poolclass=NullPool,
     echo=settings.DEBUG
 )
 

@@ -31,39 +31,47 @@ export const MQTTProvider: React.FC<MQTTProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // MQTT broker URL - using WebSocket connection
-    const brokerUrl = process.env.REACT_APP_MQTT_URL || 'ws://localhost:9001'
-    
-    // Create MQTT client
-    const mqttClient = mqtt.connect(brokerUrl, {
-      clientId: `smartgrid_web_${Math.random().toString(16).substr(2, 8)}`,
-      clean: true,
-      connectTimeout: 4000,
-      reconnectPeriod: 1000,
-    })
+    const brokerUrl = import.meta.env.VITE_MQTT_URL || 'ws://localhost:9001'
 
-    // Connection event handlers
-    mqttClient.on('connect', () => {
-      console.log('Connected to MQTT broker')
-      setIsConnected(true)
-      setClient(mqttClient)
-      toast.success('Connected to MQTT broker')
-      
-      // Subscribe to default topics
-      mqttClient.subscribe('smartgrid/+/+/data')
-      mqttClient.subscribe('smartgrid/grid/status')
-      mqttClient.subscribe('smartgrid/pricing/update')
-    })
+    let mqttClient: MqttClient | null = null
 
-    mqttClient.on('disconnect', () => {
-      console.log('Disconnected from MQTT broker')
-      setIsConnected(false)
-      toast.error('Disconnected from MQTT broker')
-    })
+    try {
+      // Create MQTT client
+      mqttClient = mqtt.connect(brokerUrl, {
+        clientId: `smartgrid_web_${Math.random().toString(16).substr(2, 8)}`,
+        clean: true,
+        connectTimeout: 4000,
+        reconnectPeriod: 5000,
+      })
 
-    mqttClient.on('error', (error) => {
-      console.error('MQTT connection error:', error)
-      toast.error('MQTT connection error')
-    })
+      // Connection event handlers
+      mqttClient.on('connect', () => {
+        console.log('Connected to MQTT broker')
+        setIsConnected(true)
+        setClient(mqttClient)
+        toast.success('Connected to MQTT broker')
+
+        // Subscribe to default topics
+        if (mqttClient) {
+          mqttClient.subscribe('smartgrid/+/+/data')
+          mqttClient.subscribe('smartgrid/grid/status')
+          mqttClient.subscribe('smartgrid/pricing/update')
+        }
+      })
+
+      mqttClient.on('disconnect', () => {
+        console.log('Disconnected from MQTT broker')
+        setIsConnected(false)
+      })
+
+      mqttClient.on('error', (error) => {
+        console.error('MQTT connection error:', error)
+        // Don't show error toast on initial connection failure
+        setIsConnected(false)
+      })
+    } catch (error) {
+      console.error('Failed to initialize MQTT client:', error)
+    }
 
     mqttClient.on('message', (topic, payload) => {
       try {
