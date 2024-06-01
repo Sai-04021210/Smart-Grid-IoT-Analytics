@@ -39,24 +39,41 @@ A comprehensive IoT analytics platform for smart grid energy management, featuri
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose (only requirement!)
+- **Docker** (version 20.10+)
+- **Docker Compose** (version 2.0+)
+- **Git** (for cloning)
+- **8GB+ RAM** (recommended for all services)
+- **Available ports**: 3000, 8000, 1880, 1883, 5432, 6379, 9001
+
+### System Requirements
+- **Linux**: Ubuntu 20.04+, CentOS 8+, or similar
+- **macOS**: 10.15+ with Docker Desktop
+- **Windows**: Windows 10+ with Docker Desktop or WSL2
 
 ### Installation
 
-**It's that simple! Just two commands:**
+**Simple two-command setup:**
 
-1. Clone the repository:
+1. **Clone the repository:**
 ```bash
 git clone https://github.com/Sai-04021210/Smart-Grid-IoT-Analytics.git
 cd Smart-Grid-IoT-Analytics
 ```
 
-2. Start all services:
+2. **Start all services:**
 ```bash
 docker compose up -d
 ```
 
-**That's it!** All services will be automatically built and started.
+**Wait 2-3 minutes** for all services to build and start.
+
+### Verify Installation
+Check if all services are running:
+```bash
+docker compose ps
+```
+
+All services should show "Up" status.
 
 ### Access the Applications
 - **Web Dashboard**: http://localhost:3000
@@ -67,6 +84,59 @@ docker compose up -d
 ### Stopping the Services
 ```bash
 docker compose down
+```
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**1. Port Already in Use**
+```bash
+# Check what's using the ports
+sudo netstat -tulpn | grep :3000
+sudo netstat -tulpn | grep :8000
+
+# Kill processes or change ports in docker-compose.yml
+```
+
+**2. Docker Build Fails**
+```bash
+# Clean Docker cache and rebuild
+docker system prune -a
+docker compose build --no-cache
+docker compose up -d
+```
+
+**3. Services Won't Start**
+```bash
+# Check logs for specific service
+docker compose logs frontend
+docker compose logs backend
+docker compose logs postgres
+
+# Restart specific service
+docker compose restart frontend
+```
+
+**4. Permission Issues (Linux)**
+```bash
+# Add user to docker group
+sudo usermod -aG docker $USER
+# Logout and login again
+```
+
+**5. Low Memory Issues**
+```bash
+# Check available memory
+free -h
+# Increase Docker memory limit in Docker Desktop settings
+```
+
+### Environment Variables
+Create `.env` file for optional configurations:
+```bash
+# Optional: OpenWeather API key for weather data
+OPENWEATHER_API_KEY=your_api_key_here
 ```
 
 ## 📊 Technology Stack
