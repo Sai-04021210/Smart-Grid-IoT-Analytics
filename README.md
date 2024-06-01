@@ -67,6 +67,20 @@ docker compose up -d
 
 **Wait 2-3 minutes** for all services to build and start.
 
+### Optional: Environment Configuration
+For enhanced features (like weather data), create a `.env` file:
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit with your API keys (optional)
+nano .env
+```
+
+**Note**: The system works perfectly without a `.env` file. It's only needed for:
+- OpenWeather API integration (renewable energy forecasting)
+- Custom configuration overrides
+
 ### Verify Installation
 Check if all services are running:
 ```bash
@@ -132,12 +146,27 @@ free -h
 # Increase Docker memory limit in Docker Desktop settings
 ```
 
-### Environment Variables
-Create `.env` file for optional configurations:
+### Environment Variables (Optional)
+The system works without any `.env` file. For enhanced features:
+
 ```bash
-# Optional: OpenWeather API key for weather data
-OPENWEATHER_API_KEY=your_api_key_here
+# Copy the template
+cp .env.example .env
+
+# Add your API keys (all optional):
+OPENWEATHER_API_KEY=your_api_key_here  # For weather-based forecasting
 ```
+
+**What works without .env file:**
+- ✅ All core functionality
+- ✅ Web dashboard and API
+- ✅ MQTT data collection
+- ✅ Basic energy predictions
+- ✅ Node-RED dashboards
+
+**What requires .env file:**
+- 🌤️ Weather-integrated renewable energy forecasting
+- 🔧 Custom database/API configurations
 
 ## 📊 Technology Stack
 
