@@ -72,11 +72,12 @@ const Sidebar: React.FC = () => {
       style={{
         overflow: 'auto',
         height: '100vh',
+        background: '#001529',
+        boxShadow: '2px 0 6px rgba(0,21,41,.35)',
         position: 'fixed',
         left: 0,
         top: 0,
-        bottom: 0,
-        background: '#001529',
+        zIndex: 100,
       }}
     >
       <div
@@ -87,11 +88,13 @@ const Sidebar: React.FC = () => {
           justifyContent: 'center',
           background: '#002140',
           borderBottom: '1px solid #1890ff',
+          cursor: 'pointer'
         }}
+        onClick={() => navigate('/dashboard')}
       >
         <div style={{ color: '#fff', fontSize: '16px', fontWeight: 'bold' }}>
           <HomeOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-          Smart Grid
+          Smart Grid IoT
         </div>
       </div>
 
@@ -104,6 +107,7 @@ const Sidebar: React.FC = () => {
         style={{
           borderRight: 0,
           background: '#001529',
+          fontSize: '14px'
         }}
       />
     </Sider>

@@ -63,17 +63,17 @@ const Header: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginLeft: 200,
         position: 'sticky',
         top: 0,
         zIndex: 10,
+        height: 64,
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <Typography.Title level={4} style={{ margin: 0, color: '#262626' }}>
           IoT Analytics Platform
         </Typography.Title>
-        
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {isConnected ? (
             <>

@@ -101,12 +101,12 @@ const EnergyMonitoring: React.FC = () => {
   }
 
   const updateChartData = (data: EnergyReading[]) => {
-    const sortedData = [...data].sort((a, b) => 
+    const sortedData = [...data].sort((a, b) =>
       new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     )
 
     setChartData({
-      labels: sortedData.map(reading => 
+      labels: sortedData.map(reading =>
         new Date(reading.timestamp).toLocaleTimeString()
       ),
       datasets: [
@@ -258,7 +258,7 @@ const EnergyMonitoring: React.FC = () => {
   const stats = calculateSummaryStats()
 
   return (
-    <div className="fade-in">
+    <div className="fade-in page-transition">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h1>Energy Monitoring</h1>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
@@ -276,8 +276,8 @@ const EnergyMonitoring: React.FC = () => {
             ))}
           </Select>
           <RangePicker showTime />
-          <Button 
-            icon={<ReloadOutlined />} 
+          <Button
+            icon={<ReloadOutlined />}
             onClick={loadReadings}
             loading={loading}
           >
@@ -355,7 +355,7 @@ const EnergyMonitoring: React.FC = () => {
                 pageSize: 10,
                 showSizeChanger: true,
                 showQuickJumper: true,
-                showTotal: (total, range) => 
+                showTotal: (total, range) =>
                   `${range[0]}-${range[1]} of ${total} readings`
               }}
               scroll={{ x: 800 }}

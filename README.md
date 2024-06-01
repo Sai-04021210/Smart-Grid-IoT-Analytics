@@ -39,28 +39,35 @@ A comprehensive IoT analytics platform for smart grid energy management, featuri
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.11+
-- Node.js 18+
-- Docker & Docker Compose
-- PostgreSQL 15+
+- Docker & Docker Compose (only requirement!)
 
 ### Installation
 
+**It's that simple! Just two commands:**
+
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/Sai-04021210/Smart-Grid-IoT-Analytics.git
 cd Smart-Grid-IoT-Analytics
 ```
 
-2. Start the services:
+2. Start all services:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-3. Access the applications:
-- Web Dashboard: http://localhost:3000
-- Node-RED Dashboard: http://localhost:1880
-- API Documentation: http://localhost:8000/docs
+**That's it!** All services will be automatically built and started.
+
+### Access the Applications
+- **Web Dashboard**: http://localhost:3000
+- **Node-RED Dashboard**: http://localhost:1880
+- **API Documentation**: http://localhost:8000/docs
+- **MQTT Broker**: localhost:1883
+
+### Stopping the Services
+```bash
+docker compose down
+```
 
 ## 📊 Technology Stack
 

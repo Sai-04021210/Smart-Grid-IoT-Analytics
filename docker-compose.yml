@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:15.6
+    image: timescale/timescaledb:latest-pg15
     container_name: smartgrid_postgres
     environment:
       POSTGRES_DB: smartgrid
@@ -16,6 +16,11 @@ services:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - smartgrid_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartgrid_user -d smartgrid"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   # MQTT Broker (Eclipse Mosquitto)
   mqtt-broker:
@@ -79,9 +84,6 @@ services:
       - REACT_APP_MQTT_URL=ws://localhost:9001
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     networks:
       - smartgrid_network
 

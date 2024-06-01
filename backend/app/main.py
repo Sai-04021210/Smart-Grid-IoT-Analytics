@@ -32,33 +32,33 @@ scheduler_service = None
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
     global mqtt_service, scheduler_service
-    
+
     # Startup
     logger.info("Starting Smart Grid IoT Analytics Backend...")
-    
+
     # Create database tables
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created/verified")
-    
+
     # Initialize MQTT service
     mqtt_service = MQTTService()
     await mqtt_service.start()
     logger.info("MQTT service started")
-    
+
     # Initialize scheduler service
     scheduler_service = SchedulerService()
     scheduler_service.start()
     logger.info("Scheduler service started")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Smart Grid IoT Analytics Backend...")
-    
+
     if mqtt_service:
         await mqtt_service.stop()
         logger.info("MQTT service stopped")
-    
+
     if scheduler_service:
         scheduler_service.stop()
         logger.info("Scheduler service stopped")
@@ -104,10 +104,11 @@ async def health_check():
     try:
         # Check database connection
         from app.core.database import SessionLocal
+        from sqlalchemy import text
         db = SessionLocal()
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         db.close()
-        
+
         return {
             "status": "healthy",
             "database": "connected",

@@ -15,11 +15,11 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Remove dev dependencies after build
-RUN npm prune --production
-
 # Install serve for production
 RUN npm install -g serve
+
+# Remove dev dependencies after build (keep serve global)
+RUN npm prune --production
 
 # Expose port
 EXPOSE 3000
