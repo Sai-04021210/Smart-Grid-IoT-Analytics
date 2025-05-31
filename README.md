@@ -2,7 +2,7 @@
 
 A comprehensive IoT analytics platform for smart grid energy management, featuring real-time energy consumption prediction, smart meter data aggregation, dynamic pricing optimization, and renewable energy forecasting.
 
-## 🌟 Features
+##  Features
 
 - **Real-time Energy Consumption Prediction**: LSTM neural networks for accurate energy demand forecasting
 - **Smart Meter Data Aggregation**: MQTT-based real-time data collection from IoT devices
@@ -11,7 +11,7 @@ A comprehensive IoT analytics platform for smart grid energy management, featuri
 - **Node-RED Dashboards**: Interactive visual dashboards for monitoring and control
 - **RESTful API**: Comprehensive API for data access and system integration
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -36,7 +36,7 @@ A comprehensive IoT analytics platform for smart grid energy management, featuri
                        └─────────────────┘
 ```
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - **Docker** (version 20.10+)
@@ -100,7 +100,7 @@ All services should show "Up" status.
 docker compose down
 ```
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -158,17 +158,17 @@ OPENWEATHER_API_KEY=your_api_key_here  # For weather-based forecasting
 ```
 
 **What works without .env file:**
-- ✅ All core functionality
-- ✅ Web dashboard and API
-- ✅ MQTT data collection
-- ✅ Basic energy predictions
-- ✅ Node-RED dashboards
+- All core functionality
+- Web dashboard and API
+- MQTT data collection
+- Basic energy predictions
+- Node-RED dashboards
 
 **What requires .env file:**
-- 🌤️ Weather-integrated renewable energy forecasting
-- 🔧 Custom database/API configurations
+- Weather-integrated renewable energy forecasting
+- Custom database/API configurations
 
-## 📊 Technology Stack
+## Technology Stack
 
 - **Backend**: FastAPI 0.110.x, Python 3.11
 - **Frontend**: React 18.2.x, Vite 5.2.x
@@ -178,7 +178,7 @@ OPENWEATHER_API_KEY=your_api_key_here  # For weather-based forecasting
 - **Visualization**: Node-RED, Plotly.js, Chart.js
 - **Containerization**: Docker 26.x
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Smart-Grid-IoT-Analytics/
@@ -193,7 +193,7 @@ Smart-Grid-IoT-Analytics/
 └── docker-compose.yml     # Docker services orchestration
 ```
 
-## 🤖 Machine Learning Models
+## Machine Learning Models
 
 ### LSTM Energy Prediction
 - **Purpose**: Predict energy consumption patterns
@@ -210,7 +210,7 @@ Smart-Grid-IoT-Analytics/
 - **Input**: Demand forecasts, generation capacity, market conditions
 - **Output**: Optimal pricing strategies
 
-## 📈 API Endpoints
+##  API Endpoints
 
 - `GET /api/v1/energy/consumption` - Get energy consumption data
 - `GET /api/v1/energy/prediction` - Get energy demand predictions
@@ -218,7 +218,7 @@ Smart-Grid-IoT-Analytics/
 - `GET /api/v1/renewable/forecast` - Get renewable energy forecasts
 - `POST /api/v1/meters/data` - Submit smart meter readings
 
-## 🔧 Development
+##  Development
 
 ### Backend Development
 ```bash
@@ -241,7 +241,7 @@ npm install
 node-red
 ```
 
-## 📚 Documentation
+## Documentation
 
 Detailed documentation is available in the `/docs` directory:
 - [API Reference](docs/api.md)
@@ -249,7 +249,7 @@ Detailed documentation is available in the `/docs` directory:
 - [Deployment Guide](docs/deployment.md)
 - [Node-RED Flows](docs/node-red.md)
 
-## 🧪 Testing
+##  Testing
 
 ```bash
 # Backend tests
@@ -262,11 +262,11 @@ cd frontend && npm test
 docker-compose -f docker-compose.test.yml up
 ```
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -274,10 +274,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 4. Push to the branch
 5. Create a Pull Request
 
-## 📞 Support
+##  Support
 
 For support and questions, please open an issue in the GitHub repository.
 
 ---
 
-**Built with ❤️ for sustainable energy management**
+**Built for sustainable energy management**
