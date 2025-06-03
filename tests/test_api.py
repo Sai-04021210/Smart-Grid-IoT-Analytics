@@ -3,11 +3,16 @@ API Tests for Smart Grid IoT Analytics
 Comprehensive test suite for all API endpoints
 """
 
+import os
+import sys
 import pytest
 import asyncio
 from httpx import AsyncClient
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
+
+# Add backend to PYTHONPATH for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
 from app.main import app
 from app.core.database import get_db, Base, engine
